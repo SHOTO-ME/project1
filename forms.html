@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Simple CV Builder</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f0f4f8;
+      color: #333;
+      max-width: 900px;
+      margin: 20px auto;
+      padding: 0 20px;
+    }
+    header {
+      background: #007acc;
+      color: white;
+      padding: 15px;
+      text-align: center;
+      border-radius: 6px;
+    }
+    form {
+      background: white;
+      padding: 20px;
+      border-radius: 6px;
+      box-shadow: 0 2px 6px rgb(0 122 204 / 0.3);
+    }
+    .section-title {
+      margin-top: 20px;
+      font-weight: bold;
+      color: #007acc;
+      border-bottom: 2px solid #007acc;
+      padding-bottom: 5px;
+    }
+    label {
+      display: block;
+      margin-top: 10px;
+      font-weight: 600;
+    }
+    input, textarea {
+      width: 100%;
+      padding: 8px;
+      margin-top: 5px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      font-size: 1rem;
+    }
+    textarea {
+      resize: vertical;
+      min-height: 60px;
+    }
+    .checkbox-group label,
+    .radio-group label {
+      display: inline-block;
+      margin-right: 15px;
+      font-weight: normal;
+    }
+    button {
+      background: #007acc;
+      color: white;
+      border: none;
+      padding: 12px 25px;
+      font-size: 1rem;
+      border-radius: 6px;
+      cursor: pointer;
+      margin-top: 20px;
+    }
+    button:hover {
+      background: #005fa3;
+    }
+    #preview {
+      background: white;
+      margin-top: 30px;
+      padding: 20px;
+      border-radius: 6px;
+      box-shadow: 0 2px 8px rgb(0 122 204 / 0.2);
+    }
+    #preview h2 {
+      color: #007acc;
+    }
+    #preview ul {
+      list-style-type: disc;
+      padding-left: 20px;
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>Simple CV Builder</h1>
+</header>
+
+<form id="cv-form">
+
+  <div class="section-title">Basic Information</div>
+  <label>Full Name *</label>
+  <input type="text" id="name" required />
+
+  <label>Email *</label>
+  <input type="email" id="email" required />
+
+  <label>Phone *</label>
+  <input type="tel" id="phone" required />
+
+  <label>Gender</label>
+  <div class="radio-group">
+    <label><input type="radio" name="gender" value="Male"> Male</label>
+    <label><input type="radio" name="gender" value="Female"> Female</label>
+    <label><input type="radio" name="gender" value="Other"> Other</label>
+  </div>
+
+  <label>LinkedIn Profile</label>
+  <input type="url" id="linkedin" placeholder="https://linkedin.com/in/yourprofile" />
+
+  <div class="section-title">Career Objective</div>
+  <textarea id="objective" required></textarea>
+
+  <div class="section-title">Skills</div>
+  <div class="checkbox-group">
+    <label><input type="checkbox" name="skills" value="Communication"> Communication</label>
+    <label><input type="checkbox" name="skills" value="Teamwork"> Teamwork</label>
+    <label><input type="checkbox" name="skills" value="Leadership"> Leadership</label>
+    <label><input type="checkbox" name="skills" value="Problem Solving"> Problem Solving</label>
+  </div>
+  <label>Other Skills (comma separated)</label>
+  <input type="text" id="other-skills" />
+
+  <div class="section-title">Work Experience</div>
+  <label>Job Title</label>
+  <input type="text" id="job-title" placeholder="e.g., Software Intern" />
+  <label>Organization</label>
+  <input type="text" id="job-org" placeholder="e.g., Microsoft" />
+  <label>Duration</label>
+  <input type="text" id="job-time" placeholder="e.g., Jan 2024 – June 2024" />
+  <label>Description</label>
+  <textarea id="job-desc" placeholder="Describe your responsibilities"></textarea>
+
+  <div class="section-title">Education</div>
+  <textarea id="education" placeholder="e.g., B.Sc. Computer Science, XYZ University, 2023–2026"></textarea>
+
+  <button type="button" id="generate-btn">Generate & Download PDF</button>
+
+</form>
+
+<div id="preview"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.9.2/html2pdf.bundle.min.js"></script>
+<script>
+  const form = document.getElementById("cv-form");
+  const preview = document.getElementById("preview");
+  const btn = document.getElementById("generate-btn");
+
+  function updatePreview() {
+    const name = form.querySelector("#name").value || "Your Name";
+    const email = form.querySelector("#email").value || "email@example.com";
+    const phone = form.querySelector("#phone").value || "+0000000000";
+    const linkedin = form.querySelector("#linkedin").value;
+    const genderInput = form.querySelector("input[name='gender']:checked");
+    const gender = genderInput ? genderInput.value : "Not specified";
+    const objective = form.querySelector("#objective").value;
+    const education = form.querySelector("#education").value;
+
+    const jobTitle = form.querySelector("#job-title").value;
+    const jobOrg = form.querySelector("#job-org").value;
+    const jobTime = form.querySelector("#job-time").value;
+    const jobDesc = form.querySelector("#job-desc").value;
+
+    const checkedSkills = [...form.querySelectorAll("input[name='skills']:checked")].map(i => i.value);
+    const otherSkills = form.querySelector("#other-skills").value.split(",").map(s => s.trim()).filter(Boolean);
+    const allSkills = [...checkedSkills, ...otherSkills];
+
+    let html = `<h2>${name}</h2>`;
+    html += `<p><strong>Email:</strong> ${email}</p>`;
+    html += `<p><strong>Phone:</strong> ${phone}</p>`;
+    html += `<p><strong>Gender:</strong> ${gender}</p>`;
+    if (linkedin) html += `<p><strong>LinkedIn:</strong> <a href="${linkedin}" target="_blank">${linkedin}</a></p>`;
+    if (objective) html += `<h3>Career Objective</h3><p>${objective}</p>`;
+    if (allSkills.length) {
+      html += "<h3>Skills</h3><ul>";
+      allSkills.forEach(skill => {
+        html += `<li>${skill}</li>`;
+      });
+      html += "</ul>";
+    }
+    if (jobTitle || jobOrg || jobTime || jobDesc) {
+      html += `<h3>Work Experience</h3>`;
+      html += `<p><strong>${jobTitle}</strong> at <strong>${jobOrg}</strong></p>`;
+      html += `<p><em>${jobTime}</em></p>`;
+      html += `<p>${jobDesc}</p>`;
+    }
+    if (education) {
+      html += `<h3>Education</h3><p>${education}</p>`;
+    }
+
+    preview.innerHTML = html;
+  }
+
+  btn.addEventListener("click", () => {
+    updatePreview();
+    html2pdf().from(preview).save("My_CV.pdf");
+  });
+</script>
+
+</body>
+</html>
